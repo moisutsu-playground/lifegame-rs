@@ -107,3 +107,21 @@ impl LifeGame {
         (x as usize, y as usize)
     }
 }
+
+impl std::string::ToString for LifeGame {
+    fn to_string(&self) -> String {
+        (0..self.height())
+            .map(|y| {
+                format!(
+                    "{}\n",
+                    (0..self.width())
+                        .map(|x| match self.get_cell_state(x, y) {
+                            CellState::Alive => "■",
+                            CellState::Dead => "□",
+                        })
+                        .collect::<String>()
+                )
+            })
+            .collect()
+    }
+}
