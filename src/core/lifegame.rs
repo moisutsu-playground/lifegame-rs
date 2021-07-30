@@ -10,33 +10,36 @@ pub enum CellState {
 #[derive(Debug, Clone)]
 pub struct LifeGame {
     cell_field: Vec<Vec<CellState>>,
-    pub height: usize,
-    pub width: usize,
 }
 
 impl LifeGame {
     pub fn new(height: usize, width: usize) -> Self {
         LifeGame {
             cell_field: vec![vec![CellState::Dead; width]; height],
-            height,
-            width,
         }
     }
 
+    pub fn height(&self) -> usize {
+        self.cell_field.len()
+    }
+
+    pub fn width(&self) -> usize {
+        self.cell_field[0].len()
+    }
+
     pub fn next(&mut self) {
-        let mut next_lifegame = self.clone();
-        for (x, y) in iproduct!(0..self.width, 0..self.height) {
-            match self.get_cell_state(x, y) {
-                CellState::Alive => match self.surrounding_alive_cells(x, y) {
-                    2 | 3 => (),
-                    _ => next_lifegame.set_cell_state(CellState::Dead, x, y),
-                },
-                CellState::Dead => {
-                    if self.surrounding_alive_cells(x, y) == 3 {
-                        next_lifegame.set_cell_state(CellState::Alive, x, y);
-                    }
-                }
-            }
+        let mut next_lifegame = LifeGame::new(self.height(), self.width());
+        for (x, y) in iproduct!(0..self.width(), 0..self.height()) {
+            let next_cell_state = match (
+                self.get_cell_state(x, y),
+                self.surrounding_alive_cells(x, y),
+            ) {
+                (CellState::Alive, 2 | 3) => CellState::Alive,
+                (CellState::Alive, _) => CellState::Dead,
+                (CellState::Dead, 3) => CellState::Alive,
+                (CellState::Dead, _) => CellState::Dead,
+            };
+            next_lifegame.set_cell_state(next_cell_state, x, y);
         }
         *self = next_lifegame;
     }
@@ -83,7 +86,7 @@ impl LifeGame {
         <T as std::convert::TryInto<i32>>::Error: std::fmt::Debug,
     {
         let (x, y) = (x.try_into().unwrap(), y.try_into().unwrap());
-        let (height, width) = (self.height as i32, self.width as i32);
+        let (height, width) = (self.height() as i32, self.width() as i32);
 
         let (x, y) = ((x + width) % width, (y + height) % height);
 
