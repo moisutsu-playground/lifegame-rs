@@ -1,4 +1,5 @@
 use itertools::iproduct;
+use rand::Rng;
 use std::convert::TryInto;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -17,6 +18,19 @@ impl LifeGame {
         LifeGame {
             cell_field: vec![vec![CellState::Dead; width]; height],
         }
+    }
+
+    pub fn new_with_random_state(height: usize, width: usize) -> Self {
+        let mut rng = rand::thread_rng();
+        let mut cell_field = vec![vec![CellState::Dead; width]; height];
+        for (x, y) in iproduct!(0..width, 0..height) {
+            cell_field[y][x] = if rng.gen() {
+                CellState::Alive
+            } else {
+                CellState::Dead
+            };
+        }
+        LifeGame { cell_field }
     }
 
     pub fn height(&self) -> usize {
