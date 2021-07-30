@@ -24,21 +24,21 @@ impl LifeGame {
     }
 
     pub fn next(&mut self) {
-        let mut new_lifegame = self.clone();
+        let mut next_lifegame = self.clone();
         for (x, y) in iproduct!(0..self.width, 0..self.height) {
             match self.get_cell_state(x, y) {
                 State::Alive => match self.surrounding_alive_cells(x, y) {
                     2 | 3 => (),
-                    _ => new_lifegame.set_cell_state(State::Dead, x, y),
+                    _ => next_lifegame.set_cell_state(State::Dead, x, y),
                 },
                 State::Dead => {
                     if self.surrounding_alive_cells(x, y) == 3 {
-                        new_lifegame.set_cell_state(State::Alive, x, y);
+                        next_lifegame.set_cell_state(State::Alive, x, y);
                     }
                 }
             }
         }
-        *self = new_lifegame;
+        *self = next_lifegame;
     }
 
     pub fn get_cell_state<T>(&self, x: T, y: T) -> State
@@ -66,14 +66,12 @@ impl LifeGame {
     {
         let (x, y) = (x.try_into().unwrap(), y.try_into().unwrap());
         let mut count = 0;
-        for move_x in -1..=1 {
-            for move_y in -1..=1 {
-                if move_x == 0 && move_y == 0 {
-                    continue;
-                }
-                if self.get_cell_state(x + move_x, y + move_y) == State::Alive {
-                    count += 1;
-                }
+        for (move_x, move_y) in iproduct!(-1..=1, -1..=1) {
+            if move_x == 0 && move_y == 0 {
+                continue;
+            }
+            if self.get_cell_state(x + move_x, y + move_y) == State::Alive {
+                count += 1;
             }
         }
         count
@@ -85,16 +83,10 @@ impl LifeGame {
         <T as std::convert::TryInto<i32>>::Error: std::fmt::Debug,
     {
         let (x, y) = (x.try_into().unwrap(), y.try_into().unwrap());
-        let x = if x >= 0 {
-            x as usize % self.width
-        } else {
-            self.width - -x as usize
-        };
-        let y = if y >= 0 {
-            y as usize % self.height
-        } else {
-            self.height - -y as usize
-        };
-        (x, y)
+        let (height, width) = (self.height as i32, self.width as i32);
+
+        let (x, y) = ((x + width) % width, (y + height) % height);
+
+        (x as usize, y as usize)
     }
 }
