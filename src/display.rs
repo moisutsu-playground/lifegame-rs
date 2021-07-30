@@ -1,10 +1,10 @@
-use crate::{LifeGame, State};
+use crate::{CellState, LifeGame};
 
-pub trait DisplayInCli {
+pub trait DisplayInCui {
     fn display(&self);
 }
 
-impl DisplayInCli for LifeGame {
+impl DisplayInCui for LifeGame {
     fn display(&self) {
         let field_as_string = (0..self.height as i32)
             .map(|y| {
@@ -12,8 +12,8 @@ impl DisplayInCli for LifeGame {
                     "{}\n",
                     (0..self.width as i32)
                         .map(|x| match self.get_cell_state(x, y) {
-                            State::Alive => "■",
-                            State::Dead => "□",
+                            CellState::Alive => "■",
+                            CellState::Dead => "□",
                         })
                         .collect::<String>()
                 )

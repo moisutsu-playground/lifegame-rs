@@ -2,14 +2,14 @@ use itertools::iproduct;
 use std::convert::TryInto;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub enum State {
+pub enum CellState {
     Alive,
     Dead,
 }
 
 #[derive(Debug, Clone)]
 pub struct LifeGame {
-    cell_field: Vec<Vec<State>>,
+    cell_field: Vec<Vec<CellState>>,
     pub height: usize,
     pub width: usize,
 }
@@ -17,7 +17,7 @@ pub struct LifeGame {
 impl LifeGame {
     pub fn new(height: usize, width: usize) -> Self {
         LifeGame {
-            cell_field: vec![vec![State::Dead; width]; height],
+            cell_field: vec![vec![CellState::Dead; width]; height],
             height,
             width,
         }
@@ -27,13 +27,13 @@ impl LifeGame {
         let mut next_lifegame = self.clone();
         for (x, y) in iproduct!(0..self.width, 0..self.height) {
             match self.get_cell_state(x, y) {
-                State::Alive => match self.surrounding_alive_cells(x, y) {
+                CellState::Alive => match self.surrounding_alive_cells(x, y) {
                     2 | 3 => (),
-                    _ => next_lifegame.set_cell_state(State::Dead, x, y),
+                    _ => next_lifegame.set_cell_state(CellState::Dead, x, y),
                 },
-                State::Dead => {
+                CellState::Dead => {
                     if self.surrounding_alive_cells(x, y) == 3 {
-                        next_lifegame.set_cell_state(State::Alive, x, y);
+                        next_lifegame.set_cell_state(CellState::Alive, x, y);
                     }
                 }
             }
@@ -41,7 +41,7 @@ impl LifeGame {
         *self = next_lifegame;
     }
 
-    pub fn get_cell_state<T>(&self, x: T, y: T) -> State
+    pub fn get_cell_state<T>(&self, x: T, y: T) -> CellState
     where
         T: TryInto<i32>,
         <T as std::convert::TryInto<i32>>::Error: std::fmt::Debug,
@@ -50,7 +50,7 @@ impl LifeGame {
         self.cell_field[y][x]
     }
 
-    pub fn set_cell_state<T>(&mut self, state: State, x: T, y: T)
+    pub fn set_cell_state<T>(&mut self, state: CellState, x: T, y: T)
     where
         T: TryInto<i32>,
         <T as std::convert::TryInto<i32>>::Error: std::fmt::Debug,
@@ -70,7 +70,7 @@ impl LifeGame {
             if move_x == 0 && move_y == 0 {
                 continue;
             }
-            if self.get_cell_state(x + move_x, y + move_y) == State::Alive {
+            if self.get_cell_state(x + move_x, y + move_y) == CellState::Alive {
                 count += 1;
             }
         }
